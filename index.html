@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Awvyyy Cinema</title>
+  <style>
+    :root{
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted:#64748b;
+      --brand:#0f766e;
+      --brand-2:#0891b2;
+      --border:#e5e7eb;
+      --accent:#f1f5f9;
+      --warn:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    .container{max-width:1100px;margin:0 auto;padding:20px}
+    header.sticky{position:sticky;top:0;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:50}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .select, .input, .btn{border:1px solid var(--border);background:#fff;padding:10px 12px;border-radius:12px;font-size:14px}
+    .btn{cursor:pointer}
+    .btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
+    .btn.ghost{background:#fff}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;background:var(--accent);font-size:12px;color:var(--muted);border:1px solid var(--border)}
+    .grid{display:grid;gap:16px}
+    @media (min-width:720px){ .grid.cols-3{grid-template-columns:repeat(3,1fr)} .grid.cols-2{grid-template-columns:repeat(2,1fr)}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+    .card .media{aspect-ratio:3/4;width:100%;background:linear-gradient(135deg,#bae6fd,#e9d5ff);display:grid;place-items:center;font-weight:700;color:#fff;font-size:24px;text-shadow:0 1px 6px rgba(0,0,0,.25)}
+    .card .body{padding:12px 14px}
+    .muted{color:var(--muted)}
+    .title{font-weight:700}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .times{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .time{padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:#fff;cursor:pointer}
+    .time:hover{background:var(--accent)}
+    .hero{display:grid;gap:16px}
+    @media (min-width:900px){ .hero{grid-template-columns:2fr 1fr}}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+    .divider{height:1px;background:var(--border);margin:12px 0}
+    /* Drawer (cart) */
+    .drawer{position:fixed;inset:0;display:none}
+    .drawer.open{display:block}
+    .drawer .overlay{position:absolute;inset:0;background:rgba(0,0,0,.2)}
+    .drawer .panel{position:absolute;right:0;top:80px;bottom:0;width:100%;max-width:400px;border-radius:0;border-left:1px solid var(--border);overflow:auto}
+    .cart-item{display:flex;gap:10px;border:1px solid var(--border);border-radius:14px;padding:10px}
+    .poster{width:60px;height:80px;border-radius:10px;object-fit:cover;border:1px solid var(--border)}
+    .actions{display:flex;gap:8px;align-items:center}
+    .footer{border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center}
+  </style>
+</head>
+<body>
+  <header class="sticky">
+    <div class="container row" style="justify-content:space-between">
+      <div class="row">
+        <div class="badge"><strong>🎟️ Awvyyy Cinema</strong></div>
+      </div>
+      <div class="row">
+        <button id="cartBtn" class="btn ghost">🛒 Корзина <span id="cartCount" class="badge">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <section class="hero">
+      <div class="panel">
+        <div class="title" style="font-size:22px">Найди сеанс сегодня</div>
+        <p class="muted">Выбирай город, кинотеатр и дату. Добавляй билеты в корзину - проведи свой вечер с кайфом.</p>
+        <div class="toolbar" style="margin-top:10px">
+          <select id="city" class="select"></select>
+          <select id="theater" class="select"></select>
+          <div id="dates" class="toolbar"></div>
+          <input id="search" class="input" placeholder="Поиск: фильм или формат"/>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="title" style="margin-bottom:8px">Подсказка</div>
+        <div class="muted" style="font-size:14px">Временно: простое бронирование без выбора мест. Схема зала будет добавлена позже.</div>
+        <div class="divider"></div>
+        <div>Цена билета: <strong id="basePrice"></strong></div>
+      </div>
+    </section>
+
+    <section style="margin-top:18px">
+      <div id="movies" class="grid cols-3"></div>
+    </section>
+  </main>
+
+  <!-- Drawer / Cart -->
+  <div id="drawer" class="drawer" aria-hidden="true">
+    <div class="overlay" data-close></div>
+    <aside class="panel" style="background:#fff">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="title">Корзина</div>
+        <button class="btn ghost" data-close>✖</button>
+      </div>
+      <div id="cartList" style="margin-top:12px;display:grid;gap:10px"></div>
+      <div class="footer">
+        <div class="title">Итого: <span id="cartTotal">€0.00</span></div>
+        <button class="btn primary" id="checkout">Перейти к оплате</button>
+      </div>
+      <p class="muted" style="font-size:12px;margin-top:8px">*Сайт находится в демо-версии, вы можете добровольно перечислить автору все ваши накопления для поддержки проекта:з</p>
+    </aside>
+  </div>
+
+  <script>
+  // ======= Моки данных =======
+  const CITIES = [
+    { id: "tallinn", name: "Tallinn" },
+    { id: "tartu", name: "Tartu" },
+    { id: "parnu", name: "Pärnu" },
+  ];
+  const THEATERS = {
+    tallinn: [
+      { id: "Awvy-sol", name: "Awvy Solaris" },
+      { id: "Awvy-ust", name: "Awvy Ülemiste" },
+    ],
+    tartu: [{ id: "Awvy-tartu", name: "Awvy Tartu Tasku" }],
+    parnu: [{ id: "Awvy-parnu", name: "Awvy Pärnu" }],
+  };
+  const MOVIES = [
+    {
+      id: "mv001",
+      title: "New Dawn",
+      tags: ["Sci‑Fi", "Thriller", "2D"],
+      durationMin: 124,
+      age: "12+",
+      cover: "",
+      synopsis: "Постапокалиптическая история о выживании и надежде. (Demo)",
+      rating: 8.2
+    },
+    {
+      id: "mv002",
+      title: "Ocean Depths",
+      tags: ["Adventure", "3D", "IMAX"],
+      durationMin: 110,
+      age: "6+",
+      cover: "",
+      synopsis: "Захватывающее подводное путешествие в формате IMAX. (Demo)",
+      rating: 7.6
+    },
+    {
+      id: "mv003",
+      title: "Comedy Night",
+      tags: ["Comedy", "2D"],
+      durationMin: 98,
+      age: "PG",
+      cover: "",
+      synopsis: "Вечер лёгкого юмора для всей семьи. (Demo)",
+      rating: 6.9
+    },
+  ];
+  function daysFromToday(n){
+    const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);
+  }
+  const TODAY = new Date().toISOString().slice(0,10);
+  const SHOWTIMES = {
+    [TODAY]: {
+      "Awvy-sol": { mv001: ["12:00","15:30","19:00"], mv002:["13:15","17:45","21:10"] },
+      "Awvy-ust": { mv001: ["11:00","14:00","20:15"], mv003:["10:20","16:10","22:00"] },
+    },
+    [daysFromToday(1)]: {
+      "Awvy-sol": { mv001: ["13:00","18:00"], mv003:["20:40"] },
+      "Awvy-ust": { mv002: ["12:30","19:30"] },
+    },
+    [daysFromToday(2)]: {
+      "Awvy-sol": { mv002: ["12:00","14:30","19:30"] },
+      "Awvy-ust": { mv001: ["18:15"], mv003:["21:20"] },
+    },
+  };
+  const BASE_PRICE = 8.9;
+
+  // ======= Простые утилиты =======
+  const fmtCurrency = (n)=> new Intl.NumberFormat(undefined,{style:"currency",currency:"EUR"}).format(n);
+  const $ = (sel, root=document)=> root.querySelector(sel);
+  const $$ = (sel, root=document)=> Array.from(root.querySelectorAll(sel));
+
+  // ======= Состояние (сохраняем часть в localStorage) =======
+  const LS_KEY = "Awvy-cart";
+  const state = {
+    city: "tallinn",
+    theater: THEATERS["tallinn"][0].id,
+    date: TODAY,
+    query: "",
+    cart: loadCart()
+  };
+
+  function loadCart(){
+    try{ return JSON.parse(localStorage.getItem(LS_KEY)) || []; }catch{ return []; }
+  }
+  function saveCart(){
+    localStorage.setItem(LS_KEY, JSON.stringify(state.cart));
+    updateCartBadge();
+  }
+
+  // ======= Инициализация интерфейса =======
+  const citySel = $("#city");
+  const theaterSel = $("#theater");
+  const datesWrap = $("#dates");
+  const searchInput = $("#search");
+  const moviesWrap = $("#movies");
+  const basePriceEl = $("#basePrice");
+
+  function init(){
+    basePriceEl.textContent = fmtCurrency(BASE_PRICE);
+    // Город
+    citySel.innerHTML = CITIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+    citySel.value = state.city;
+    citySel.addEventListener("change", (e)=>{
+      state.city = e.target.value;
+      // обновить список кинотеатров
+      fillTheaters();
+      renderMovies();
+    });
+    // Кинотеатр
+    fillTheaters();
+    theaterSel.addEventListener("change", (e)=>{
+      state.theater = e.target.value;
+      renderMovies();
+    });
+    // Даты (сегодня + 2 дня)
+    datesWrap.innerHTML = [0,1,2].map(i=>{
+      const d = daysFromToday(i);
+      const label = new Date(d).toLocaleDateString(undefined,{weekday:"short", day:"2-digit", month:"short"});
+      const active = d===state.date ? "style='background:var(--text);color:#fff;border-color:var(--text)'" : "";
+      return `<button class="btn" data-date="${d}" ${active}>${label}</button>`;
+    }).join("");
+    datesWrap.addEventListener("click",(e)=>{
+      const btn = e.target.closest("button[data-date]");
+      if(!btn) return;
+      state.date = btn.getAttribute("data-date");
+      // активная кнопка
+      $$(".toolbar .btn", datesWrap.parentElement).forEach(b=> b.removeAttribute("style"));
+      btn.setAttribute("style", "background:var(--text);color:#fff;border-color:var(--text)");
+      renderMovies();
+    });
+    // Поиск
+    searchInput.addEventListener("input",(e)=>{ state.query = e.target.value.trim().toLowerCase(); renderMovies(); });
+
+    // Корзина
+    $("#cartBtn").addEventListener("click", openCart);
+    $$("#drawer [data-close]").forEach(b=> b.addEventListener("click", closeCart));
+    $("#checkout").addEventListener("click", ()=> alert("Все ваши средства были перечислены автору, благодарим."));
+
+    updateCartBadge();
+    renderMovies();
+  }
+
+  function fillTheaters(){
+    const list = THEATERS[state.city] || [];
+    theaterSel.innerHTML = list.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
+    if(!list.find(t=>t.id===state.theater)){ state.theater = list[0]?.id || ""; }
+    theaterSel.value = state.theater;
+  }
+
+  // ======= Рендер фильмов и сеансов =======
+  function matchesQuery(movie){
+    if(!state.query) return true;
+    const blob = (movie.title + " " + (movie.tags||[]).join(" ")).toLowerCase();
+    return blob.includes(state.query);
+  }
+
+  function getTimes(movieId){
+    return (SHOWTIMES?.[state.date]?.[state.theater]?.[movieId]) || [];
+  }
+
+  function movieCard(movie){
+    const times = getTimes(movie.id);
+    const media = `<div class="media">${movie.title.split(" ").slice(0,2).join(" ")}</div>`;
+    return `
+      <article class="card">
+        ${media}
+        <div class="body">
+          <div class="row" style="justify-content:space-between;align-items:flex-end">
+            <div>
+              <div class="title">${movie.title}</div>
+              <div class="muted" style="font-size:12px">Возраст: ${movie.age} · ${movie.durationMin} мин · ⭐ ${movie.rating}</div>
+              <div style="margin-top:6px">${(movie.tags||[]).slice(0,3).map(t=>`<span class="badge">${t}</span>`).join(" ")}</div>
+            </div>
+          </div>
+          <p class="muted" style="margin-top:8px">${movie.synopsis}</p>
+          <div class="times">
+            ${times.length ? times.map(t=>`<button class="time" data-add='${JSON.stringify({movieId:movie.id,time:t})}'>${t}</button>`).join("") : `<span class="muted">На эту дату сеансов нет.</span>`}
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderMovies(){
+    const list = MOVIES.filter(matchesQuery);
+    moviesWrap.innerHTML = list.map(movieCard).join("");
+    // навесим клики "Добавить"
+    $$(".time", moviesWrap).forEach(btn => {
+      btn.addEventListener("click", () => {
+        const payload = JSON.parse(btn.getAttribute("data-add"));
+        addToCart(payload.movieId, payload.time);
+      });
+    });
+  }
+
+  // ======= Корзина =======
+  function addToCart(movieId, time){
+    const movie = MOVIES.find(m=>m.id===movieId);
+    if(!movie || !time) return;
+    const theaterName = (THEATERS[state.city]||[]).find(t=>t.id===state.theater)?.name || "";
+    const item = {
+      id: `${movieId}-${state.date}-${state.theater}-${time}-${Math.random().toString(36).slice(2,7)}`,
+      movieId,
+      title: movie.title,
+      date: state.date,
+      time,
+      theaterId: state.theater,
+      theaterName,
+      qty: 1,
+      price: BASE_PRICE
+    };
+    state.cart.unshift(item);
+    saveCart();
+    openCart();
+    renderCart();
+  }
+
+  function removeFromCart(id){
+    state.cart = state.cart.filter(x=>x.id!==id);
+    saveCart();
+    renderCart();
+  }
+
+  function updateCartBadge(){
+    $("#cartCount").textContent = state.cart.length;
+  }
+
+  function renderCart(){
+    const wrap = $("#cartList");
+    if(state.cart.length===0){
+      wrap.innerHTML = `<div class="muted">Корзина пуста.</div>`;
+    }else{
+      wrap.innerHTML = state.cart.map(it=>{
+        const cover = `<div class="poster" style="background:linear-gradient(135deg,#c7d2fe,#fbcfe8);display:grid;place-items:center;font-weight:700;color:#fff">${(it.title||"").split(" ")[0]}</div>`;
+        const dateStr = new Date(it.date).toLocaleDateString();
+        return `
+          <div class="cart-item">
+            ${cover}
+            <div style="flex:1">
+              <div class="title">${it.title}</div>
+              <div class="muted" style="font-size:12px">${dateStr} · ${it.time} · ${it.theaterName}</div>
+              <div style="margin-top:4px">Билетов: 
+                <button class="btn ghost" data-dec="${it.id}">−</button>
+                <strong>${it.qty}</strong>
+                <button class="btn ghost" data-inc="${it.id}">+</button>
+              </div>
+              <div class="title" style="margin-top:6px">${fmtCurrency(it.price * it.qty)}</div>
+            </div>
+            <div class="actions">
+              <button class="btn ghost" data-del="${it.id}">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+    const total = state.cart.reduce((s,it)=> s + it.price*it.qty, 0);
+    $("#cartTotal").textContent = fmtCurrency(total);
+
+    // Слушатели на кнопки в корзине
+    $$("#cartList [data-del]").forEach(b=> b.addEventListener("click", ()=> removeFromCart(b.getAttribute("data-del"))));
+    $$("#cartList [data-inc]").forEach(b=> b.addEventListener("click", ()=> changeQty(b.getAttribute("data-inc"), +1)));
+    $$("#cartList [data-dec]").forEach(b=> b.addEventListener("click", ()=> changeQty(b.getAttribute("data-dec"), -1)));
+  }
+
+  function changeQty(id, delta){
+    const it = state.cart.find(x=>x.id===id);
+    if(!it) return;
+    it.qty = Math.max(1, it.qty + delta);
+    saveCart();
+    renderCart();
+  }
+
+  function openCart(){ $("#drawer").classList.add("open"); renderCart(); }
+  function closeCart(){ $("#drawer").classList.remove("open"); }
+
+  // ======= Запуск =======
+  document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
