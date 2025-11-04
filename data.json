@@ -1,0 +1,79 @@
+{
+  "base_price": 8.9,
+  "cities": [
+    { "id": "tallinn", "name": "Tallinn" },
+    { "id": "tartu", "name": "Tartu" },
+    { "id": "parnu", "name": "Pärnu" }
+  ],
+  "theaters": {
+    "tallinn": [
+      { "id": "Awvy-sol", "name": "Awvy Solaris" },
+      { "id": "Awvy-ust", "name": "Awvy Ülemiste" }
+    ],
+    "tartu": [
+      { "id": "Awvy-tartu", "name": "Awvy Tartu Tasku" }
+    ],
+    "parnu": [
+      { "id": "Awvy-parnu", "name": "Awvy Pärnu" }
+    ]
+  },
+  "movies": [
+    {
+      "id": "mv001",
+      "title": "New Dawn",
+      "tags": ["Sci-Fi", "Thriller", "2D"],
+      "durationMin": 124,
+      "age": "12+",
+      "synopsis": "Постапокалиптическая история о выживании и надежде. (Demo)",
+      "rating": 8.2
+    },
+    {
+      "id": "mv002",
+      "title": "Ocean Depths",
+      "tags": ["Adventure", "3D", "IMAX"],
+      "durationMin": 110,
+      "age": "6+",
+      "synopsis": "Захватывающее подводное путешествие в формате IMAX. (Demo)",
+      "rating": 7.6
+    },
+    {
+      "id": "mv003",
+      "title": "Comedy Night",
+      "tags": ["Comedy", "2D"],
+      "durationMin": 98,
+      "age": "PG",
+      "synopsis": "Вечер лёгкого юмора для всей семьи. (Demo)",
+      "rating": 6.9
+    }
+  ],
+  "showtimes": {
+    "2025-11-04": {
+      "Awvy-sol": {
+        "mv001": ["12:00", "15:30", "19:00"],
+        "mv002": ["13:15", "17:45", "21:10"]
+      },
+      "Awvy-ust": {
+        "mv001": ["11:00", "14:00", "20:15"],
+        "mv003": ["10:20", "16:10", "22:00"]
+      }
+    },
+    "2025-11-05": {
+      "Awvy-sol": {
+        "mv001": ["13:00", "18:00"],
+        "mv003": ["20:40"]
+      },
+      "Awvy-ust": {
+        "mv002": ["12:30", "19:30"]
+      }
+    },
+    "2025-11-06": {
+      "Awvy-sol": {
+        "mv002": ["12:00", "14:30", "19:30"]
+      },
+      "Awvy-ust": {
+        "mv001": ["18:15"],
+        "mv003": ["21:20"]
+      }
+    }
+  }
+}
