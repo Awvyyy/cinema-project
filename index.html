@@ -339,6 +339,7 @@
     <div class="row">
       <button id="themeToggle" class="btn ghost" title="Сменить тему">🌙</button>
       <button id="cartBtn" class="btn ghost">🛒 Корзина <span id="cartCount" class="badge">0</span></button>
+      <button id="loginBtn" class="btn ghost">🔐 Войти</button>
     </div>
   </div>
 </header>
@@ -409,6 +410,33 @@
 <!-- Toast container -->
 <div id="toastContainer"></div>
 
+<!-- Модалка логина -->
+<div id="loginModal" class="drawer" aria-hidden="true">
+  <div class="overlay" data-close></div>
+  <aside class="panel" style="background:var(--card);color:var(--text);max-width:360px;margin:auto;border-radius:16px;padding:20px">
+    <h2 class="title">Вход / Регистрация</h2>
+    <input id="loginEmail" class="input" placeholder="Email" type="email" style="width:100%;margin-top:8px">
+    <input id="loginPassword" class="input" placeholder="Пароль" type="password" style="width:100%;margin-top:8px">
+    <div class="row" style="justify-content:space-between;margin-top:12px">
+      <button id="doLogin" class="btn primary">Войти</button>
+      <button id="doRegister" class="btn ghost">Регистрация</button>
+    </div>
+  </aside>
+</div>
+
+<!-- ✅ Модалка профиля — вынесена отдельно, а не внутри логина -->
+<div id="profileModal" class="drawer" aria-hidden="true">
+  <div class="overlay" data-close></div>
+  <aside class="panel" style="background:var(--card);color:var(--text);max-width:400px;margin:auto;border-radius:16px;padding:20px">
+    <h2 class="title">Мой профиль</h2>
+    <div id="profileInfo" class="muted" style="margin-top:10px;font-size:14px"></div>
+    <div id="profileBookings" style="margin-top:14px;font-size:14px"></div>
+    <div style="margin-top:16px;text-align:right">
+      <button id="logoutBtn" class="btn ghost">🚪 Выйти</button>
+    </div>
+  </aside>
+</div>
+
 <script>
 let DATA={},CITIES=[],THEATERS={},MOVIES=[],SHOWTIMES={},BASE_PRICE=0,PRICES={};
 const TODAY = new Date().toISOString().slice(0,10);
@@ -428,7 +456,7 @@ const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
 
 /* Load JSON */
 async function loadData(){
-  const res = await fetch("data.json");
+  const res = await fetch("/api/movies");
   DATA = await res.json();
   ({cities:CITIES,theaters:THEATERS,movies:MOVIES,showtimes:SHOWTIMES,base_price:BASE_PRICE,prices:PRICES} = DATA);
 
@@ -633,42 +661,48 @@ function closeSeatModal(){
 
 function renderSeatGrid(){
   const grid = $("#seatGrid");
-  grid.innerHTML = "";
+  grid.innerHTML = `<div class="muted">Загружаем схему зала...</div>`;
+
   const rows = 8, cols = 12;
+  const baseReserved = seededRandomArray(seatCtx.key + "|static", rows * cols, Math.floor(rows * cols * 0.12));
 
-  // Статические занятые места
-  const baseReserved = seededRandomArray(seatCtx.key+"|static", rows*cols, Math.floor(rows*cols*0.12));
+  fetch(`/api/seats?showKey=${encodeURIComponent(seatCtx.key)}`)
+    .then(r => r.json())
+    .then(serverSeats => {
+      if (!seatCtx) return; // модалку могли закрыть
+      const reservedFromServer = new Set((serverSeats || []).map(s => s.seatId));
 
-  // Активные временные брони
-  cleanupExpiredHolds(false);
-  const holds = loadSeatHolds();
-  const keyHolds = holds[seatCtx.key] || [];
-  const heldSeats = new Set(keyHolds.map(h=>h.seatId));
+      grid.innerHTML = "";
+      for (let r = 0; r < rows; r++) {
+        const row = document.createElement("div");
+        row.className = "row-seats";
+        for (let c = 0; c < cols; c++) {
+          const id = `${String.fromCharCode(65 + r)}${c + 1}`;
+          const idx = r * cols + c;
+          const btn = document.createElement("button");
+          btn.className = "seat";
+          btn.textContent = c + 1;
+          btn.title = id;
 
-  for(let r=0;r<rows;r++){
-    const row = document.createElement("div");
-    row.className = "row-seats";
-    for(let c=0;c<cols;c++){
-      const id = `${String.fromCharCode(65+r)}${c+1}`;
-      const idx = r*cols + c;
-      const btn = document.createElement("button");
-      btn.className = "seat";
-      btn.textContent = c+1;
-      btn.title = id;
+          if (baseReserved.has(idx) || reservedFromServer.has(id)) {
+            btn.classList.add("reserved");
+            btn.disabled = true;
+          }
 
-      if(baseReserved.has(idx) || heldSeats.has(id)){
-        btn.classList.add("reserved");
-        btn.disabled = true;
+          btn.addEventListener("click", () => toggleSeat(btn, id));
+          row.appendChild(btn);
+        }
+        grid.appendChild(row);
       }
 
-      btn.addEventListener("click", () => toggleSeat(btn,id));
-      row.appendChild(btn);
-    }
-    grid.appendChild(row);
-  }
-
-  $("#applySeats").onclick = applySelectedSeats;
+      $("#applySeats").onclick = applySelectedSeats;
+    })
+    .catch(() => {
+      if (!seatCtx) return;
+      grid.innerHTML = `<div class="muted">Ошибка загрузки мест. Попробуйте позже.</div>`;
+    });
 }
+
 
 function toggleSeat(btn,id){
   if(!seatCtx || btn.classList.contains("reserved")) return;
@@ -694,40 +728,61 @@ function toggleSeat(btn,id){
   }
 }
 
-function applySelectedSeats(){
-  if(!seatCtx) return;
+async function applySelectedSeats(){
+  if (!seatCtx) return;
   const seats = [...seatCtx.picked].sort();
-  if(!seats.length) return;
+  if (!seats.length) return;
 
   const { movie, time, key } = seatCtx;
   const theaterName = (THEATERS[state.city]||[]).find(t=>t.id===state.theater)?.name || "";
   const { price: pricePer } = getBasePriceForMovie(movie, state.date);
-  const expiresAt = Date.now() + HOLD_MS;
-  const totalPrice = Number((pricePer * seats.length).toFixed(2));
 
-  // В корзину
-  const cartItem = {
-    id: `${movie.id}-${state.date}-${time}-${Math.random().toString(36).slice(2,7)}`,
-    movieId: movie.id,
-    title: movie.title,
-    date: state.date,
-    time,
-    theaterName,
-    seats,
-    pricePer,
-    price: totalPrice,
-    holdKey: key,
-    expiresAt
-  };
-  state.cart.unshift(cartItem);
-  saveCart();
+  try {
+    const res = await fetch("/api/reserve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ showKey: key, seats })
+    });
+    const data = await res.json();
 
-  // Бронь мест
-  holdSeatsForShow(key, seats, expiresAt);
+    if (!res.ok || !data.ok) {
+      // конфликты: кто-то успел раньше
+      if (data.conflicts && data.conflicts.length) {
+        showToast("❌ Эти места уже заняты: " + data.conflicts.join(", "));
+      } else {
+        showToast("❌ Не удалось забронировать места. Попробуйте ещё раз.");
+      }
+      // перерисовать схему с актуальными данными
+      renderSeatGrid();
+      return;
+    }
 
-  closeSeatModal();
-  openCart();
+    const expiresAt = data.expiresAt; // сервер сообщает, когда истечёт бронь
+    const totalPrice = Number((pricePer * seats.length).toFixed(2));
+
+    state.cart.unshift({
+      id: `${movie.id}-${state.date}-${time}-${Math.random().toString(36).slice(2,7)}`,
+      movieId: movie.id,
+      title: movie.title,
+      date: state.date,
+      time,
+      theaterName,
+      seats,
+      pricePer,
+      price: totalPrice,
+      holdKey: key,
+      expiresAt
+    });
+
+    saveCart();
+    closeSeatModal();
+    openCart();
+  } catch (e) {
+    console.error(e);
+    showToast("❌ Ошибка сервера при бронировании мест.");
+  }
 }
+
 
 /* Holds ops */
 function holdSeatsForShow(showKey, seats, expiresAt){
@@ -745,14 +800,16 @@ function holdSeatsForShow(showKey, seats, expiresAt){
 }
 
 function releaseSeatsForShow(showKey, seats){
-  if(!showKey || !seats || !seats.length) return;
-  const holds = loadSeatHolds();
-  if(!holds[showKey]) return;
-  const drop = new Set(seats);
-  holds[showKey] = holds[showKey].filter(h => !drop.has(h.seatId));
-  if(!holds[showKey].length) delete holds[showKey];
-  saveSeatHolds(holds);
+  if (!showKey || !seats || !seats.length) return;
+  fetch("/api/release", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ showKey, seats })
+  }).catch(() => {
+    console.warn("Failed to release seats on server");
+  });
 }
+
 
 /* Seeded random */
 function seededRandomArray(seedStr, max, take){
@@ -949,6 +1006,141 @@ function hideTooltip() {
 
 /* Boot */
 document.addEventListener("DOMContentLoaded", loadData);
+
+// === LOGIN SYSTEM ===
+document.addEventListener("DOMContentLoaded", () => {
+  const TOKEN_KEY = "Awvy-user-token";
+  let currentUser = null;
+
+
+// открытие / закрытие окна логина
+const loginModal = document.getElementById("loginModal");
+$("#loginBtn").onclick = () => loginModal.classList.add("open");
+$$("#loginModal [data-close]").forEach(b => b.onclick = () => loginModal.classList.remove("open"));
+
+// регистрация
+$("#doRegister").onclick = async () => {
+  const email = $("#loginEmail").value.trim();
+  const password = $("#loginPassword").value;
+  if (!email || !password) return showToast("⚠️ Введите email и пароль");
+
+  const res = await fetch("/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+
+  if (res.status === 409) return showToast("❌ Эл. почта уже зарегистрирована");
+  if (data.ok) showToast("✅ Регистрация успешна! Теперь войдите.");
+  else showToast("❌ " + (data.error || "Ошибка регистрации"));
+};
+
+// вход
+$("#doLogin").onclick = async () => {
+  const email = $("#loginEmail").value.trim();
+  const password = $("#loginPassword").value;
+  if (!email || !password) return showToast("⚠️ Введите email и пароль");
+
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+
+  if (res.status === 401) {
+    if (data.error?.includes("not found")) showToast("❌ Эл. почта не зарегистрирована");
+    else showToast("❌ Неверный пароль");
+    return;
+  }
+
+  if (data.ok) {
+    localStorage.setItem(TOKEN_KEY, data.token);
+    currentUser = email;
+    showToast(`👋 Добро пожаловать, ${email}`);
+    loginModal.classList.remove("open");
+    updateUserUI();
+  } else showToast("❌ " + (data.error || "Ошибка входа"));
+};
+
+// проверка токена при загрузке
+async function checkLogin() {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return;
+  const res = await fetch("/api/me", { headers: { Authorization: "Bearer " + token } });
+  const data = await res.json();
+  if (data.ok) currentUser = data.email;
+  else localStorage.removeItem(TOKEN_KEY);
+  updateUserUI();
+}
+
+function updateUserUI() {
+  const btn = $("#loginBtn");
+  if (currentUser) {
+    // Показываем email и открываем профиль
+    btn.textContent = `👤 ${currentUser}`;
+    btn.onclick = openProfile;
+  } else {
+    // Если не авторизован — показываем окно логина
+    btn.textContent = "🔐 Войти";
+    btn.onclick = () => $("#loginModal").classList.add("open");
+  }
+}
+
+
+document.addEventListener("DOMContentLoaded", checkLogin);
+});
+
+// === Профиль пользователя ===
+function openProfile() {
+  if (!currentUser) return;
+  const modal = $("#profileModal");
+  const info = $("#profileInfo");
+  const bookings = $("#profileBookings");
+  
+  info.innerHTML = `<strong>Email:</strong> ${currentUser}`;
+  
+  const myBookings = (state.cart || []).filter(x => x && x.title);
+  if (!myBookings.length) {
+    bookings.innerHTML = `<div class="muted">Бронирований пока нет 🎟️</div>`;
+  } else {
+    bookings.innerHTML = myBookings.map(it => `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:6px;background:var(--accent)">
+        <div><strong>${it.title}</strong></div>
+        <div class="muted" style="font-size:12px">
+          ${new Date(it.date).toLocaleDateString()} · ${it.time} · ${it.theaterName}
+        </div>
+        <div style="font-size:13px">Места: ${it.seats ? it.seats.join(", ") : "—"}</div>
+      </div>
+    `).join("");
+  }
+  modal.classList.add("open");
+}
+
+// закрытие и выход
+$$("#profileModal [data-close]").forEach(b => b.onclick = () => $("#profileModal").classList.remove("open"));
+$("#logoutBtn").onclick = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  currentUser = null;
+  $("#profileModal").classList.remove("open");
+  showToast("🚪 Вы вышли из аккаунта");
+  updateUserUI();
+};
+
+// обновляем updateUserUI, чтобы открывал профиль
+function updateUserUI() {
+  const btn = $("#loginBtn");
+  if (currentUser) {
+    btn.textContent = `👤 ${currentUser}`;
+    btn.onclick = openProfile;
+  } else {
+    btn.textContent = "🔐 Войти";
+    btn.onclick = () => $("#loginModal").classList.add("open");
+  }
+}
+
+
 </script>
 </body>
 </html>
