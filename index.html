@@ -9,57 +9,327 @@
     --bg:#f7f7fb;
     --card:#ffffff;
     --text:#0f172a;
-    --muted:#64748b;
+    --muted:#475569;
     --border:#e5e7eb;
     --accent:#f1f5f9;
     --brand:#2563eb;
     --brand-hover:#1d4ed8;
     --shadow:rgba(15,23,42,0.08);
+    --seat-free:#e2e8f0;
+    --seat-picked:#2563eb;
+    --seat-reserved:#94a3b8;
+    --seat-hover:#93c5fd;
   }
   [data-theme="dark"] {
-    --bg:#0f172a;
-    --card:#1e293b;
-    --text:#f8fafc;
-    --muted:#94a3b8;
-    --border:#334155;
-    --accent:#1e293b;
-    --shadow:rgba(0,0,0,0.4);
+    --bg:#0b1220;
+    --card:#0f172a;
+    --text:#f1f5f9;
+    --muted:#cbd5e1;
+    --border:#263246;
+    --accent:#111827;
+    --shadow:rgba(0,0,0,0.5);
+    --seat-free:#1f2937;
+    --seat-picked:#60a5fa;
+    --seat-reserved:#374151;
+    --seat-hover:#3b82f6;
   }
 
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
+  html,body{
+    margin:0;padding:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+    background:var(--bg);color:var(--text);
+    transition:background .3s,color .3s;
+  }
   .container{max-width:1100px;margin:0 auto;padding:20px}
-  header.sticky{position:sticky;top:0;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);z-index:50;box-shadow:0 2px 4px var(--shadow);transition:background .3s}
+  header.sticky{
+    position:sticky;top:0;
+    background:rgba(255,255,255,.75);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    z-index:50;
+    box-shadow:0 2px 4px var(--shadow);
+    transition:background .3s;
+  }
   [data-theme="dark"] header.sticky{background:rgba(15,23,42,.9)}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .select,.input,.btn{border:1px solid var(--border);background:var(--card);padding:10px 12px;border-radius:12px;font-size:14px;transition:.2s}
+
+  .select,.input,.btn{
+    border:1px solid var(--border);
+    background:var(--card);
+    padding:10px 12px;
+    border-radius:12px;
+    font-size:14px;
+    transition:.2s;
+    color:var(--text);
+  }
+  .input::placeholder{color:var(--muted)}
   .btn{cursor:pointer}
   .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
   .btn.primary:hover{background:var(--brand-hover)}
   .btn.ghost{background:var(--card)}
   .btn.ghost:hover{background:var(--accent)}
-  .badge{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;background:var(--accent);font-size:12px;color:var(--muted);border:1px solid var(--border)}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 8px;border-radius:999px;
+    background:var(--accent);font-size:12px;color:var(--muted);
+    border:1px solid var(--border)
+  }
+
   .grid{display:grid;gap:16px}
   @media(min-width:720px){.grid.cols-3{grid-template-columns:repeat(3,1fr)}}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 3px 8px var(--shadow);transition:transform .25s,box-shadow .25s;opacity:0;animation:fadeIn .4s ease forwards}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 3px 8px var(--shadow);
+    transition:transform .25s,box-shadow .25s;
+    opacity:0;
+    animation:fadeIn .4s ease forwards;
+  }
   .card:hover{transform:translateY(-6px);box-shadow:0 8px 16px var(--shadow)}
-  .card .media{aspect-ratio:3/4;width:100%;background:linear-gradient(135deg,#60a5fa,#9333ea);display:grid;place-items:center;font-weight:700;color:#fff;font-size:24px}
+  .card .media{
+    aspect-ratio:3/4;width:100%;
+    background:linear-gradient(135deg,#60a5fa,#9333ea);
+    display:grid;place-items:center;
+    font-weight:700;color:#fff;font-size:24px;
+  }
   .card .body{padding:12px 14px}
   .muted{color:var(--muted)}
   .title{font-weight:700}
   .times{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .time{padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;transition:.2s}
+  .time{
+    padding:8px 10px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--card);
+    cursor:pointer;
+    transition:.2s;
+    color:var(--text);
+  }
   .time:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 2px 8px var(--shadow)}
+
+  .panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:18px;
+    box-shadow:0 2px 8px var(--shadow);
+  }
+
   .drawer{position:fixed;inset:0;display:none}
   .drawer.open{display:block}
-  .drawer .overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);animation:fadeIn .3s}
-  .drawer .panel{position:absolute;right:0;top:80px;bottom:0;width:100%;max-width:400px;border-left:1px solid var(--border);background:var(--card);overflow:auto;border-radius:16px 0 0 0;box-shadow:-5px 0 10px var(--shadow);animation:fadeIn .3s}
-  .cart-item{display:flex;gap:10px;border:1px solid var(--border);border-radius:14px;padding:10px;background:var(--accent);transition:.2s}
+  .drawer .overlay{
+    position:absolute;inset:0;
+    background:rgba(0,0,0,.4);
+    animation:fadeIn .3s;
+  }
+  .drawer .panel{
+    position:absolute;right:0;top:80px;bottom:0;
+    width:100%;max-width:400px;
+    border-left:1px solid var(--border);
+    background:var(--card);
+    overflow:auto;
+    border-radius:16px 0 0 0;
+    box-shadow:-5px 0 10px var(--shadow);
+    animation:fadeIn .3s;
+  }
+
+  .cart-item{
+    display:flex;gap:10px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px;
+    background:var(--accent);
+    transition:.2s;
+  }
   .cart-item:hover{background:var(--card)}
-  .poster{width:60px;height:80px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#3b82f6,#9333ea);color:#fff;font-weight:700}
-  .footer{border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center}
+  .poster{
+    width:60px;height:80px;
+    border-radius:10px;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg,#3b82f6,#9333ea);
+    color:#fff;font-weight:700;
+  }
+  .footer{
+    border-top:1px solid var(--border);
+    padding-top:10px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+
+  /* Modal (seat picker) */
+  .modal{position:fixed;inset:0;display:none}
+  .modal.open{display:grid;place-items:center}
+  .modal .overlay{
+    position:absolute;inset:0;
+    background:rgba(0,0,0,.5);
+    animation:fadeIn .3s;
+  }
+  .modal .content{
+    position:relative;z-index:1;
+    width:min(920px,92vw);
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:0 12px 30px var(--shadow);
+    padding:18px;
+    animation:pop .2s ease;
+  }
+  @keyframes pop{from{opacity:.6;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+
+  .screen{
+    background:linear-gradient(180deg,rgba(148,163,184,.4),transparent);
+    color:var(--muted);
+    text-align:center;
+    padding:6px;
+    border-radius:10px;
+    margin-bottom:12px;
+    font-size:12px;
+    letter-spacing:.08em;
+  }
+  .seats{display:grid;gap:10px;justify-content:center}
+  .row-seats{display:flex;gap:8px;justify-content:center}
+  .seat{
+    width:28px;height:28px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    background:var(--seat-free);
+    display:grid;place-items:center;
+    font-size:11px;
+    cursor:pointer;
+    user-select:none;
+    transition:transform .1s ease, background .2s ease, box-shadow .2s ease, color .2s;
+    color:var(--text);
+  }
+  .seat:hover{
+    transform:translateY(-1px);
+    box-shadow:0 2px 6px var(--shadow);
+    background:var(--seat-hover);
+    color:#fff;
+  }
+  .seat.picked{
+    background:var(--seat-picked);
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 2px 8px var(--shadow);
+  }
+  .seat.reserved{
+    background:var(--seat-reserved);
+    color:#9ca3af;
+    border-style:dashed;
+    cursor:not-allowed;
+    opacity:.7;
+  }
+  .legend{
+    display:flex;gap:10px;
+    flex-wrap:wrap;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:8px;
+  }
+  .legend .dot{
+    width:14px;height:14px;
+    border-radius:4px;
+    display:inline-block;
+    margin-right:6px;
+    border:1px solid var(--border);
+  }
+  .legend .free{background:var(--seat-free)}
+  .legend .pick{background:var(--seat-picked)}
+  .legend .res{background:var(--seat-reserved)}
+
+  .modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:start;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .modal-title{font-weight:700}
+  .modal-sub{font-size:12px;color:var(--muted)}
+  .modal-actions{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+    justify-content:flex-end;
+    align-items:center;
+  }
+
+  /* Toast */
+  #toastContainer{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    z-index:80;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .toast{
+    min-width:220px;
+    max-width:280px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:var(--card);
+    color:var(--text);
+    box-shadow:0 4px 12px var(--shadow);
+    border:1px solid var(--border);
+    font-size:12px;
+    opacity:0;
+    transform:translateY(10px);
+    transition:all .25s ease;
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+/* Tooltip (в фирменных цветах Awvyyy Cinema) */
+.tooltip {
+  position: absolute;
+  background: color-mix(in srgb, var(--brand) 10%, var(--card) 92%);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--brand) 50%, var(--border));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--brand) 25%, var(--shadow));
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 260px;
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent color-mix(in srgb, var(--brand) 10%, var(--card) 92%) transparent;
+  filter: drop-shadow(0 -1px 2px color-mix(in srgb, var(--brand) 30%, var(--shadow)));
+}
+.tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.tooltip strong {
+  color: var(--brand);
+}
+
+
+
 </style>
 </head>
 <body>
@@ -76,14 +346,18 @@
 <main class="container">
   <section class="panel">
     <div class="title" style="font-size:22px">Найди сеанс сегодня</div>
-    <p class="muted">Выбирай город, кинотеатр и дату. Добавляй билеты в корзину — проведи свой вечер с кайфом 🎬</p>
+    <p class="muted">Выбирай город, кинотеатр и дату. Бронируй места — как в реальном кинотеатре 🎬</p>
     <div class="row" style="margin-top:10px;flex-wrap:wrap;gap:8px">
       <select id="city" class="select"></select>
       <select id="theater" class="select"></select>
       <div id="dates" class="row" style="gap:8px"></div>
       <input id="search" class="input" placeholder="Поиск: фильм или формат"/>
     </div>
-    <div style="margin-top:12px">Цена билета: <strong id="basePrice"></strong></div>
+    <div style="margin-top:12px">
+      <span class="muted" style="font-size:12px">
+        Цены подтягиваются из <code>data.json</code> (2D/3D/IMAX, +10% в выходные)
+      </span>
+    </div>
   </section>
 
   <section style="margin-top:20px">
@@ -91,6 +365,7 @@
   </section>
 </main>
 
+<!-- Drawer Cart -->
 <div id="drawer" class="drawer" aria-hidden="true">
   <div class="overlay" data-close></div>
   <aside class="panel">
@@ -106,52 +381,574 @@
   </aside>
 </div>
 
+<!-- Modal Seat Picker -->
+<div id="seatModal" class="modal" aria-hidden="true">
+  <div class="overlay" data-close></div>
+  <div class="content">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="seatTitle">Выбор мест</div>
+        <div class="modal-sub" id="seatSub"></div>
+      </div>
+      <button class="btn ghost" data-close>✖</button>
+    </div>
+    <div class="screen">ЭКРАН</div>
+    <div id="seatGrid" class="seats"></div>
+    <div class="legend">
+      <span><span class="dot free"></span>Свободно</span>
+      <span><span class="dot pick"></span>Вы выбрали</span>
+      <span><span class="dot res"></span>Занято / в бронях</span>
+    </div>
+    <div class="modal-actions">
+      <div class="muted" id="seatSummary">Места не выбраны</div>
+      <button class="btn primary" id="applySeats" disabled>Добавить в корзину</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer"></div>
+
 <script>
-let DATA={},CITIES=[],THEATERS={},MOVIES=[],SHOWTIMES={},BASE_PRICE=0;
-const TODAY=new Date().toISOString().slice(0,10);
-const LS_KEY="Awvy-cart",THEME_KEY="Awvy-theme";
-const state={city:"",theater:"",date:TODAY,query:"",cart:[]};
+let DATA={},CITIES=[],THEATERS={},MOVIES=[],SHOWTIMES={},BASE_PRICE=0,PRICES={};
+const TODAY = new Date().toISOString().slice(0,10);
+const LS_CART_KEY="Awvy-cart";
+const LS_SEATS_KEY="Awvy-seats";
+const THEME_KEY="Awvy-theme";
+const HOLD_MS = 7*60*1000; // 7 минут
 
-const fmtCurrency=n=>new Intl.NumberFormat(undefined,{style:"currency",currency:"EUR"}).format(n);
-const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const state = { city:"", theater:"", date:TODAY, query:"", cart:[] };
+let seatCtx = null; // { movie, time, key, picked:Set }
+let countdownTimer = null;
 
+/* Utils */
+const fmtCurrency = n => new Intl.NumberFormat(undefined,{style:"currency",currency:"EUR"}).format(n);
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+
+/* Load JSON */
 async function loadData(){
-  const res=await fetch("data.json");DATA=await res.json();
-  ({cities:CITIES,theaters:THEATERS,movies:MOVIES,showtimes:SHOWTIMES,base_price:BASE_PRICE}=DATA);
-  state.city=CITIES[0].id;state.theater=THEATERS[state.city][0].id;state.cart=loadCart();
+  const res = await fetch("data.json");
+  DATA = await res.json();
+  ({cities:CITIES,theaters:THEATERS,movies:MOVIES,showtimes:SHOWTIMES,base_price:BASE_PRICE,prices:PRICES} = DATA);
+
+  if(!PRICES || typeof PRICES!=="object") PRICES = {};
+  if(!PRICES["2D"])  PRICES["2D"]  = BASE_PRICE || 8.9;
+  if(!PRICES["3D"])  PRICES["3D"]  = 10.9;
+  if(!PRICES["IMAX"])PRICES["IMAX"]= 12.9;
+
+  state.city = CITIES[0].id;
+  state.theater = THEATERS[state.city][0].id;
+  state.cart = loadCart();
+
+  cleanupExpiredHolds(false);
   init();
 }
+
+/* Init UI */
 function init(){
-  $("#basePrice").textContent=fmtCurrency(BASE_PRICE);
-  fillCities();fillTheaters();fillDates();
-  $("#search").addEventListener("input",e=>{state.query=e.target.value.trim().toLowerCase();renderMovies();});
-  $("#cartBtn").addEventListener("click",openCart);
-  $$("#drawer [data-close]").forEach(b=>b.addEventListener("click",closeCart));
-  $("#checkout").addEventListener("click",()=>alert("Оплата недоступна в демо-версии"));
-  $("#themeToggle").addEventListener("click",toggleTheme);
+  fillCities();
+  fillTheaters();
+  fillDates();
+  $("#search").addEventListener("input", e => {
+    state.query = e.target.value.trim().toLowerCase();
+    renderMovies();
+  });
+  $("#cartBtn").addEventListener("click", openCart);
+  $$("#drawer [data-close]").forEach(b=>b.addEventListener("click", closeCart));
+  $("#checkout").addEventListener("click", () => {
+    alert("Оплата недоступна в демо-версии, но бронь и логика работают.");
+  });
+  $("#themeToggle").addEventListener("click", toggleTheme);
   applyTheme(loadTheme());
-  updateCartBadge();renderMovies();
+  $$("#seatModal [data-close]").forEach(b=>b.addEventListener("click", closeSeatModal));
+  updateCartBadge();
+  renderMovies();
+  startCountdownLoop();
 }
-function fillCities(){const el=$("#city");el.innerHTML=CITIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");el.value=state.city;el.onchange=e=>{state.city=e.target.value;fillTheaters();renderMovies();};}
-function fillTheaters(){const el=$("#theater");const list=THEATERS[state.city]||[];el.innerHTML=list.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");state.theater=list[0]?.id||"";el.value=state.theater;el.onchange=e=>{state.theater=e.target.value;renderMovies();};}
-function fillDates(){const wrap=$("#dates");wrap.innerHTML=[0,1,2].map(i=>{const d=new Date();d.setDate(d.getDate()+i);const iso=d.toISOString().slice(0,10);const lbl=d.toLocaleDateString(undefined,{weekday:"short",day:"2-digit",month:"short"});return `<button class="btn" data-date="${iso}" ${iso===state.date?"style='background:var(--brand);color:#fff;border-color:var(--brand)'":""}>${lbl}</button>`;}).join("");wrap.onclick=e=>{const btn=e.target.closest("button[data-date]");if(!btn)return;state.date=btn.dataset.date;$$("#dates button").forEach(b=>b.removeAttribute("style"));btn.style.background="var(--brand)";btn.style.color="#fff";renderMovies();};}
-function matchesQuery(m){return!state.query||(m.title+" "+m.tags.join(" ")).toLowerCase().includes(state.query);}
-function getTimes(id){return(SHOWTIMES?.[state.date]?.[state.theater]?.[id])||[];}
-function movieCard(m){const t=getTimes(m.id);return `<article class="card"><div class="media">${m.title.split(" ")[0]}</div><div class="body"><div class="title">${m.title}</div><div class="muted" style="font-size:12px">Возраст: ${m.age} · ${m.durationMin} мин · ⭐ ${m.rating}</div><p class="muted" style="margin-top:8px">${m.synopsis}</p><div class="times">${t.length?t.map(x=>`<button class="time" data-add='${JSON.stringify({movieId:m.id,time:x})}'>${x}</button>`).join(""):`<span class="muted">Нет сеансов</span>`}</div></div></article>`;}
-function renderMovies(){const list=MOVIES.filter(matchesQuery);$("#movies").innerHTML=list.map(movieCard).join("");$$(".time").forEach(b=>b.onclick=()=>{const p=JSON.parse(b.dataset.add);addToCart(p.movieId,p.time);});}
-function loadCart(){try{return JSON.parse(localStorage.getItem(LS_KEY))||[];}catch{return[];}}
-function saveCart(){localStorage.setItem(LS_KEY,JSON.stringify(state.cart));updateCartBadge();}
-function updateCartBadge(){$("#cartCount").textContent=state.cart.length;}
-function addToCart(mid,time){const m=MOVIES.find(x=>x.id===mid);if(!m)return;const thName=(THEATERS[state.city]||[]).find(t=>t.id===state.theater)?.name||"";state.cart.unshift({id:`${mid}-${state.date}-${time}-${Math.random().toString(36).slice(2,7)}`,movieId:mid,title:m.title,date:state.date,time,qty:1,price:BASE_PRICE,theaterName:thName});saveCart();openCart();renderCart();}
-function renderCart(){const w=$("#cartList");if(state.cart.length===0){w.innerHTML=`<div class="muted">Корзина пуста.</div>`;return;}w.innerHTML=state.cart.map(it=>`<div class="cart-item"><div class="poster">${it.title.split(" ")[0]}</div><div style="flex:1"><div class="title">${it.title}</div><div class="muted" style="font-size:12px">${new Date(it.date).toLocaleDateString()} · ${it.time} · ${it.theaterName}</div><div style="margin-top:4px">Билетов:<button class="btn ghost" data-dec="${it.id}">−</button><strong>${it.qty}</strong><button class="btn ghost" data-inc="${it.id}">+</button></div><div class="title" style="margin-top:6px">${fmtCurrency(it.price*it.qty)}</div></div><button class="btn ghost" data-del="${it.id}">🗑️</button></div>`).join("");const total=state.cart.reduce((s,i)=>s+i.price*i.qty,0);$("#cartTotal").textContent=fmtCurrency(total);$$("#cartList [data-del]").forEach(b=>b.onclick=()=>{state.cart=state.cart.filter(x=>x.id!==b.dataset.del);saveCart();renderCart();});$$("#cartList [data-inc]").forEach(b=>b.onclick=()=>changeQty(b.dataset.inc,1));$$("#cartList [data-dec]").forEach(b=>b.onclick=()=>changeQty(b.dataset.dec,-1));}
-function changeQty(id,d){const it=state.cart.find(x=>x.id===id);if(!it)return;it.qty=Math.max(1,it.qty+d);saveCart();renderCart();}
-function openCart(){$("#drawer").classList.add("open");renderCart();}
-function closeCart(){$("#drawer").classList.remove("open");}
-function toggleTheme(){const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";applyTheme(t);saveTheme(t);}
-function applyTheme(t){document.documentElement.setAttribute("data-theme",t);$("#themeToggle").textContent=t==="dark"?"☀️":"🌙";}
-function saveTheme(t){localStorage.setItem(THEME_KEY,t);}
-function loadTheme(){return localStorage.getItem(THEME_KEY)||"light";}
-document.addEventListener("DOMContentLoaded",loadData);
+
+/* Selectors: cities/theaters/dates */
+function fillCities(){
+  const el = $("#city");
+  el.innerHTML = CITIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+  el.value = state.city;
+  el.onchange = e => {
+    state.city = e.target.value;
+    fillTheaters();
+    renderMovies();
+  };
+}
+function fillTheaters(){
+  const el = $("#theater");
+  const list = THEATERS[state.city] || [];
+  el.innerHTML = list.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
+  state.theater = list[0]?.id || "";
+  el.value = state.theater;
+  el.onchange = e => {
+    state.theater = e.target.value;
+    renderMovies();
+  };
+}
+function fillDates(){
+  const wrap = $("#dates");
+  wrap.innerHTML = [0,1,2].map(i=>{
+    const d=new Date(); d.setDate(d.getDate()+i);
+    const iso=d.toISOString().slice(0,10);
+    const lbl=d.toLocaleDateString(undefined,{weekday:"short",day:"2-digit",month:"short"});
+    return `<button class="btn" data-date="${iso}" ${iso===state.date?"style='background:var(--brand);color:#fff;border-color:var(--brand)'":""}>${lbl}</button>`;
+  }).join("");
+  wrap.onclick = e => {
+    const btn = e.target.closest("button[data-date]");
+    if(!btn) return;
+    state.date = btn.dataset.date;
+    $$("#dates button").forEach(b=>b.removeAttribute("style"));
+    btn.style.background="var(--brand)";
+    btn.style.color="#fff";
+    renderMovies();
+  };
+}
+
+/* Search / filter */
+function matchesQuery(m){
+  if(!state.query) return true;
+  return (m.title+" "+(m.tags||[]).join(" ")).toLowerCase().includes(state.query);
+}
+function getTimes(id){
+  return (SHOWTIMES?.[state.date]?.[state.theater]?.[id]) || [];
+}
+
+/* Pricing based on tags + weekend */
+function getBasePriceForMovie(movie, dateIso){
+  const tags = (movie.tags || []).map(t=>t.toUpperCase());
+  let format = null;
+  for(const tag of tags){
+    if(PRICES[tag] != null){
+      format = tag;
+      break;
+    }
+  }
+  if(!format){
+    if(PRICES["2D"] != null) format = "2D";
+  }
+  let base = format && PRICES[format] != null ? PRICES[format] : (BASE_PRICE || 8.9);
+  const day = new Date(dateIso).getDay(); // 0=Sun,6=Sat
+  if(day===0 || day===6) base *= 1.1;
+  return { price: Number(base.toFixed(2)), format: format || "2D" };
+}
+
+/* Movies grid */
+function movieCard(m){
+  const t = getTimes(m.id);
+  const { price, format } = getBasePriceForMovie(m, state.date);
+  const priceLine = `<div style="margin-top:4px;font-size:13px;color:var(--brand);font-weight:600;">💶 от ${fmtCurrency(price)}${format ? ` (${format})` : ""}</div>`;
+  return `
+    <article class="card">
+      <div class="media">${m.title.split(" ")[0]}</div>
+      <div class="body">
+        <div class="title">${m.title}</div>
+        <div class="muted" style="font-size:12px">
+          ${m.durationMin} мин · ⭐ ${m.rating}
+        </div>
+        ${priceLine}
+        <p class="muted" style="margin-top:8px">${m.synopsis}</p>
+        <div class="times">
+          ${t.length
+            ? t.map(x=>`<button class="time" data-pick='${JSON.stringify({movieId:m.id,time:x})}'>${x}</button>`).join("")
+            : `<span class="muted">Нет сеансов</span>`}
+        </div>
+      </div>
+    </article>`;
+}
+function renderMovies(){
+  const list = MOVIES.filter(matchesQuery);
+  $("#movies").innerHTML = list.map(movieCard).join("");
+  $$(".time").forEach(btn => {
+    btn.onclick = () => {
+      const p = JSON.parse(btn.dataset.pick);
+      openSeatModal(p.movieId, p.time);
+    };
+  });
+}
+
+/* Cart storage */
+function loadCart(){
+  try { return JSON.parse(localStorage.getItem(LS_CART_KEY)) || []; }
+  catch { return []; }
+}
+function saveCart(){
+  localStorage.setItem(LS_CART_KEY, JSON.stringify(state.cart));
+  updateCartBadge();
+}
+function updateCartBadge(){
+  $("#cartCount").textContent = state.cart.length;
+}
+
+/* Seat holds storage */
+function loadSeatHolds(){
+  try { return JSON.parse(localStorage.getItem(LS_SEATS_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveSeatHolds(data){
+  localStorage.setItem(LS_SEATS_KEY, JSON.stringify(data));
+}
+
+/* Clean expired holds */
+function cleanupExpiredHolds(showToastFlag){
+  const now = Date.now();
+  let holds = loadSeatHolds();
+  let expiredFound = false;
+
+  for(const key of Object.keys(holds)){
+    const fresh = holds[key].filter(h => h.expiresAt > now);
+    if(fresh.length !== holds[key].length) expiredFound = true;
+    if(fresh.length) holds[key] = fresh;
+    else delete holds[key];
+  }
+
+  if(expiredFound && showToastFlag){
+    showToast("⚠️ Бронь некоторых мест истекла — они снова доступны.");
+  }
+  saveSeatHolds(holds);
+}
+
+/* Seat modal */
+function openSeatModal(movieId, time){
+  const movie = MOVIES.find(x=>x.id===movieId);
+  if(!movie) return;
+  const theaterName = (THEATERS[state.city]||[]).find(t=>t.id===state.theater)?.name || "";
+  const key = `${movieId}|${state.theater}|${state.date}|${time}`;
+  seatCtx = { movie, time, key, picked:new Set() };
+
+  $("#seatTitle").textContent = `Выбор мест — ${movie.title}`;
+  $("#seatSub").textContent = `${theaterName} • ${new Date(state.date).toLocaleDateString()} • ${time}`;
+  renderSeatGrid();
+  $("#seatSummary").textContent = "Места не выбраны";
+  $("#applySeats").disabled = true;
+  $("#seatModal").classList.add("open");
+}
+function closeSeatModal(){
+  $("#seatModal").classList.remove("open");
+  seatCtx = null;
+}
+
+function renderSeatGrid(){
+  const grid = $("#seatGrid");
+  grid.innerHTML = "";
+  const rows = 8, cols = 12;
+
+  // Статические занятые места
+  const baseReserved = seededRandomArray(seatCtx.key+"|static", rows*cols, Math.floor(rows*cols*0.12));
+
+  // Активные временные брони
+  cleanupExpiredHolds(false);
+  const holds = loadSeatHolds();
+  const keyHolds = holds[seatCtx.key] || [];
+  const heldSeats = new Set(keyHolds.map(h=>h.seatId));
+
+  for(let r=0;r<rows;r++){
+    const row = document.createElement("div");
+    row.className = "row-seats";
+    for(let c=0;c<cols;c++){
+      const id = `${String.fromCharCode(65+r)}${c+1}`;
+      const idx = r*cols + c;
+      const btn = document.createElement("button");
+      btn.className = "seat";
+      btn.textContent = c+1;
+      btn.title = id;
+
+      if(baseReserved.has(idx) || heldSeats.has(id)){
+        btn.classList.add("reserved");
+        btn.disabled = true;
+      }
+
+      btn.addEventListener("click", () => toggleSeat(btn,id));
+      row.appendChild(btn);
+    }
+    grid.appendChild(row);
+  }
+
+  $("#applySeats").onclick = applySelectedSeats;
+}
+
+function toggleSeat(btn,id){
+  if(!seatCtx || btn.classList.contains("reserved")) return;
+  const picked = seatCtx.picked;
+  if(picked.has(id)){
+    picked.delete(id);
+    btn.classList.remove("picked");
+  } else {
+    picked.add(id);
+    btn.classList.add("picked");
+  }
+
+  const arr = [...picked].sort();
+  if(!arr.length){
+    $("#seatSummary").textContent = "Места не выбраны";
+    $("#applySeats").disabled = true;
+  } else {
+    const { price } = getBasePriceForMovie(seatCtx.movie, state.date);
+    const total = fmtCurrency(price * arr.length);
+    $("#seatSummary").textContent =
+      `Выбрано: ${arr.join(", ")} · ${arr.length} бил. · ${total}`;
+    $("#applySeats").disabled = false;
+  }
+}
+
+function applySelectedSeats(){
+  if(!seatCtx) return;
+  const seats = [...seatCtx.picked].sort();
+  if(!seats.length) return;
+
+  const { movie, time, key } = seatCtx;
+  const theaterName = (THEATERS[state.city]||[]).find(t=>t.id===state.theater)?.name || "";
+  const { price: pricePer } = getBasePriceForMovie(movie, state.date);
+  const expiresAt = Date.now() + HOLD_MS;
+  const totalPrice = Number((pricePer * seats.length).toFixed(2));
+
+  // В корзину
+  const cartItem = {
+    id: `${movie.id}-${state.date}-${time}-${Math.random().toString(36).slice(2,7)}`,
+    movieId: movie.id,
+    title: movie.title,
+    date: state.date,
+    time,
+    theaterName,
+    seats,
+    pricePer,
+    price: totalPrice,
+    holdKey: key,
+    expiresAt
+  };
+  state.cart.unshift(cartItem);
+  saveCart();
+
+  // Бронь мест
+  holdSeatsForShow(key, seats, expiresAt);
+
+  closeSeatModal();
+  openCart();
+}
+
+/* Holds ops */
+function holdSeatsForShow(showKey, seats, expiresAt){
+  const now = Date.now();
+  const holds = loadSeatHolds();
+  const current = (holds[showKey] || []).filter(h=>h.expiresAt > now);
+  const existing = new Set(current.map(h=>h.seatId));
+  for(const seatId of seats){
+    if(!existing.has(seatId)){
+      current.push({ seatId, expiresAt });
+    }
+  }
+  holds[showKey] = current;
+  saveSeatHolds(holds);
+}
+
+function releaseSeatsForShow(showKey, seats){
+  if(!showKey || !seats || !seats.length) return;
+  const holds = loadSeatHolds();
+  if(!holds[showKey]) return;
+  const drop = new Set(seats);
+  holds[showKey] = holds[showKey].filter(h => !drop.has(h.seatId));
+  if(!holds[showKey].length) delete holds[showKey];
+  saveSeatHolds(holds);
+}
+
+/* Seeded random */
+function seededRandomArray(seedStr, max, take){
+  let seed = 0;
+  for(const ch of seedStr){
+    seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+  }
+  function rand(){
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    return (seed>>>0) / 4294967296;
+  }
+  const set = new Set();
+  while(set.size < take && set.size < max){
+    set.add(Math.floor(rand()*max));
+  }
+  return set;
+}
+
+/* Cart render + countdown */
+function renderCart(){
+  const w = $("#cartList");
+  if(!state.cart.length){
+    w.innerHTML = `<div class="muted">Корзина пуста.</div>`;
+  } else {
+    const now = Date.now();
+    w.innerHTML = state.cart.map(it=>{
+      const hasSeats = it.seats && it.seats.length;
+      let countdownHtml = "";
+      if(hasSeats && it.expiresAt){
+        const remaining = it.expiresAt - now;
+        if(remaining > 0){
+          const mm = Math.floor(remaining / 60000);
+          const ss = Math.floor((remaining % 60000)/1000);
+          const mmStr = mm.toString().padStart(2,"0");
+          const ssStr = ss.toString().padStart(2,"0");
+          countdownHtml =
+            `<div class="muted countdown" data-id="${it.id}">
+              🕒 Бронь истекает через ${mmStr}:${ssStr}
+             </div>`;
+        } else {
+          countdownHtml =
+            `<div class="muted countdown expired" data-id="${it.id}">
+              ⏳ Бронь истекла
+             </div>`;
+        }
+      }
+      return `
+        <div class="cart-item">
+          <div class="poster">${it.title.split(" ")[0]}</div>
+          <div style="flex:1">
+            <div class="title">${it.title}</div>
+            <div class="muted" style="font-size:12px">
+              ${new Date(it.date).toLocaleDateString()} · ${it.time} · ${it.theaterName}
+            </div>
+            <div style="margin-top:4px">
+              Места: <strong>${(it.seats||[]).join(", ")}</strong>
+            </div>
+            ${countdownHtml}
+            <div class="title" style="margin-top:6px">
+              ${fmtCurrency(it.price || 0)}
+            </div>
+          </div>
+          <button class="btn ghost" data-del="${it.id}">🗑️</button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  const total = state.cart.reduce((s,i)=>s + (i.price || 0), 0);
+  $("#cartTotal").textContent = fmtCurrency(total);
+
+  $$("#cartList [data-del]").forEach(b=>{
+  $$(".countdown").forEach(el => {
+  el.addEventListener("mouseenter", () => {
+    showTooltip(el, "⚠️ После окончания времени бронь снимается — место может быть куплено другим пользователем");
+  });
+  el.addEventListener("mouseleave", hideTooltip);
+});
+
+    b.onclick = () => {
+      const id = b.dataset.del;
+      const it = state.cart.find(x=>x.id===id);
+      if(it && it.holdKey && it.seats){
+        releaseSeatsForShow(it.holdKey, it.seats);
+      }
+      state.cart = state.cart.filter(x=>x.id!==id);
+      saveCart();
+      renderCart();
+    };
+  });
+}
+
+/* Countdown loop */
+function startCountdownLoop(){
+  if(countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(()=>{
+    const now = Date.now();
+    let changed = false;
+
+    // update / expire items
+    state.cart = state.cart.filter(it=>{
+      if(!it.expiresAt || !it.seats || !it.seats.length) return true;
+      const remaining = it.expiresAt - now;
+      if(remaining <= 0){
+        // show expired text briefly (handled by rerender) & remove
+        releaseSeatsForShow(it.holdKey, it.seats);
+        showToast("⚠️ Бронь истекла — места снова доступны.");
+        changed = true;
+        return false;
+      } else {
+        const el = document.querySelector(`.countdown[data-id="${it.id}"]`);
+        if(el){
+          const mm = Math.floor(remaining / 60000);
+          const ss = Math.floor((remaining % 60000)/1000);
+          const mmStr = mm.toString().padStart(2,"0");
+          const ssStr = ss.toString().padStart(2,"0");
+          el.textContent = `🕒 Бронь истекает через ${mmStr}:${ssStr}`;
+        }
+        return true;
+      }
+    });
+
+    if(changed){
+      saveCart();
+      renderCart();
+    }
+
+    cleanupExpiredHolds(false);
+  }, 1000);
+}
+
+/* Drawer */
+function openCart(){
+  $("#drawer").classList.add("open");
+  renderCart();
+}
+function closeCart(){
+  $("#drawer").classList.remove("open");
+}
+
+/* Theme */
+function toggleTheme(){
+  const t = document.documentElement.getAttribute("data-theme")==="dark" ? "light" : "dark";
+  applyTheme(t);
+  saveTheme(t);
+}
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  $("#themeToggle").textContent = t==="dark" ? "☀️" : "🌙";
+}
+function saveTheme(t){
+  localStorage.setItem(THEME_KEY, t);
+}
+function loadTheme(){
+  return localStorage.getItem(THEME_KEY) || "light";
+}
+
+/* Toast */
+function showToast(message){
+  const container = $("#toastContainer");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = message;
+  container.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add("show"));
+  setTimeout(()=>{
+    el.classList.remove("show");
+    setTimeout(()=>el.remove(),250);
+  },4000);
+}
+
+/* Tooltip logic */
+let tooltipEl = null;
+function showTooltip(target, message) {
+  hideTooltip();
+  tooltipEl = document.createElement("div");
+  tooltipEl.className = "tooltip";
+  tooltipEl.textContent = message;
+  document.body.appendChild(tooltipEl);
+  const rect = target.getBoundingClientRect();
+  tooltipEl.style.left = rect.left + window.scrollX + "px";
+  tooltipEl.style.top = rect.bottom + window.scrollY + 6 + "px";
+  requestAnimationFrame(() => tooltipEl.classList.add("show"));
+}
+function hideTooltip() {
+  if (tooltipEl) {
+    tooltipEl.classList.remove("show");
+    setTimeout(() => tooltipEl?.remove(), 150);
+    tooltipEl = null;
+  }
+}
+
+/* Boot */
+document.addEventListener("DOMContentLoaded", loadData);
 </script>
 </body>
 </html>
