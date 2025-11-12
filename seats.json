@@ -1,52 +1,12 @@
 {
-  "mv002|Awvy-sol|2025-11-11|17:45": [
-    {
-      "seatId": "E1",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E10",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E11",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E12",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E2",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E3",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E4",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E5",
-      "expiresAt": 1762855587128
-    },
+  "mv003|Awvy-sol|2025-11-12|20:40": [
     {
       "seatId": "E6",
-      "expiresAt": 1762855587128
+      "expiresAt": 1762957916941
     },
     {
       "seatId": "E7",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E8",
-      "expiresAt": 1762855587128
-    },
-    {
-      "seatId": "E9",
-      "expiresAt": 1762855587128
+      "expiresAt": 1762957916941
     }
   ]
 }
