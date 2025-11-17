@@ -398,6 +398,31 @@
   border-color: var(--brand);
 }
 
+.media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.media {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 16px 16px 0 0;
+  padding: 0;
+  background: #000;
+}
+
+.media-fallback {
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  display: grid;
+  place-items: center;
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+}
+
+
   </style>
 </head>
 <body>
@@ -761,7 +786,7 @@ function onLogout(){
 /* ========= ДАННЫЕ / UI ========= */
 async function loadData(){
   try{
-    const res = await fetch("/api/movies");
+    const res = await fetch("/api/movies/live");
     DATA = await res.json();
 
     CITIES = DATA.cities || [];
@@ -889,29 +914,45 @@ function getBasePriceForMovie(movie,dateIso){
   return { price:Number(base.toFixed(2)), format };
 }
 
-function movieCard(m){
-  const times = getTimes(m.id);
-  const {price,format} = getBasePriceForMovie(m,state.date);
+function movieCard(m) {
+  const t = getTimes(m.id);
+  const { price, format } = getBasePriceForMovie(m, state.date);
+
+  const posterHTML = m.poster
+    ? `<img src="${m.poster}" class="media-img" alt="${m.title}">`
+    : `<div class="media media-fallback">${m.title.slice(0,1)}</div>`;
+
   return `
-  <article class="card">
-    <div class="media">${m.title.split(" ")[0]}</div>
-    <div class="body">
-      <div class="title">${m.title}</div>
-      <div class="muted">${m.durationMin} мин · ⭐ ${m.rating}</div>
-      <div class="muted" style="margin-top:2px;color:var(--brand);font-weight:600;">
-        от ${fmtCurrency(price)}${format ? " · " + format : ""}
+    <article class="card" data-movie-id="${m.id}">
+      <div class="media">${posterHTML}</div>
+      <div class="body">
+        <div class="title">${m.title}</div>
+
+        <div class="muted" style="font-size:12px">
+          ${m.durationMin} мин · ⭐ ${m.rating}
+        </div>
+
+        <div style="margin-top:4px;font-size:13px;color:var(--brand);font-weight:600;">
+          💶 от ${fmtCurrency(price)} (${format})
+        </div>
+
+        <p class="muted" style="margin-top:8px">${m.synopsis}</p>
+
+        <div class="times">
+          ${
+            t.length
+              ? t.map(
+                  x => `<button class="time" data-pick='${JSON.stringify({movieId:m.id,time:x})}'>${x}</button>`
+                ).join("")
+              : `<span class="muted">Нет сеансов</span>`
+          }
+        </div>
       </div>
-      <p class="muted" style="margin-top:6px">${m.synopsis}</p>
-      <div class="times">
-        ${
-          times.length
-          ? times.map(t=>`<button class="time" data-pick='${JSON.stringify({movieId:m.id,time:t})}'>${t}</button>`).join("")
-          : `<span class="muted">Нет сеансов на выбранную дату</span>`
-        }
-      </div>
-    </div>
-  </article>`;
+    </article>
+  `;
 }
+
+
 
 function renderMovies(){
   const wrap = $("#movies");
@@ -1212,6 +1253,18 @@ function releaseSeatsOnServer(showKey,seats){
     body:JSON.stringify({showKey,seats})
   }).catch(e=>console.warn("release failed",e));
 }
+
+document.addEventListener("click", e => {
+  // если нажатие на кнопку выбора времени — открываем модалку
+  if (e.target.classList.contains("time")) return;
+
+  const card = e.target.closest(".card[data-movie-id]");
+  if (card) {
+    const id = card.dataset.movieId;
+    location.href = "movie.html?id=" + id;
+  }
+});
+
 
 /* ========= BOOT ========= */
 document.addEventListener("DOMContentLoaded",()=>{
